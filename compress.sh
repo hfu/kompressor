@@ -134,10 +134,15 @@ compress_geotiff() {
     # Create output subdirectory if it doesn't exist
     mkdir -p "$output_subdir"
     
-    # Skip if output file already exists and is newer than input
-    if [ -f "$output_file" ] && [ "$output_file" -nt "$input_file" ]; then
-        echo "[SKIP] Already compressed: $relative_path"
-        return 0
+    # Skip if output file already exists and is a valid GeoTIFF
+    if [ -f "$output_file" ]; then
+        # Check if the output file is a valid GeoTIFF
+        if gdalinfo "$output_file" &> /dev/null; then
+            echo "[SKIP] Already compressed: $relative_path"
+            return 0
+        else
+            echo "[RECOMPRESS] Invalid GeoTIFF, recompressing: $relative_path"
+        fi
     fi
     
     # Compress the file using gdal_translate
