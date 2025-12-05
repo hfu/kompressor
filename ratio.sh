@@ -82,8 +82,12 @@ while IFS= read -r input_file; do
         # Get output file size
         output_size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file" 2>/dev/null)
         
-        # Calculate compression ratio as integer percentage
-        ratio=$((output_size * 100 / input_size))
+        # Calculate compression ratio as integer percentage (guard against division by zero)
+        if [ "$input_size" -gt 0 ]; then
+            ratio=$((output_size * 100 / input_size))
+        else
+            ratio=0
+        fi
         
         # Display file name and ratio
         printf "%-80s %3d%%\n" "$relative_path" "$ratio"
@@ -115,16 +119,20 @@ if [ $compressed_count -gt 0 ]; then
     echo "  Output total size: $(numfmt --to=iec-i --suffix=B $total_output_size 2>/dev/null || echo "$total_output_size bytes")"
     echo ""
     
-    # Calculate overall compression ratio
-    overall_ratio=$((total_output_size * 100 / total_input_size))
-    space_saved=$((total_input_size - total_output_size))
-    
-    echo "Overall compression ratio: $overall_ratio% of original size"
-    echo "Space saved: $(numfmt --to=iec-i --suffix=B $space_saved 2>/dev/null || echo "$space_saved bytes")"
-    
-    # Calculate compression percentage (how much was reduced)
-    compression_percentage=$((100 - overall_ratio))
-    echo "Compression percentage: $compression_percentage% reduction"
+    # Calculate overall compression ratio (guard against division by zero)
+    if [ $total_input_size -gt 0 ]; then
+        overall_ratio=$((total_output_size * 100 / total_input_size))
+        space_saved=$((total_input_size - total_output_size))
+        
+        echo "Overall compression ratio: $overall_ratio% of original size"
+        echo "Space saved: $(numfmt --to=iec-i --suffix=B $space_saved 2>/dev/null || echo "$space_saved bytes")"
+        
+        # Calculate compression percentage (how much was reduced)
+        compression_percentage=$((100 - overall_ratio))
+        echo "Compression percentage: $compression_percentage% reduction"
+    else
+        echo "Overall compression ratio: N/A (zero input size)"
+    fi
 else
     echo "Compressed files: 0"
 fi
