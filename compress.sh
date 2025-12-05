@@ -175,7 +175,7 @@ compress_geotiff() {
     
     gdal_cmd+=(-co TILED=YES -co BIGTIFF=IF_SAFER "$input_file" "$output_file")
     
-    if "${gdal_cmd[@]}" 2>&1; then
+    if "${gdal_cmd[@]}" 2>/dev/null; then
         echo "[OK] Compressed: $relative_path"
     else
         echo "[ERROR] Failed to compress: $relative_path" >&2
@@ -224,8 +224,13 @@ echo "Compression complete!"
 
 if [ "$DRY_RUN" = false ]; then
     # Show statistics
-    INPUT_SIZE=$(du -sh "$INPUT_DIR" | cut -f1)
-    OUTPUT_SIZE=$(du -sh "$OUTPUT_DIR" | cut -f1)
-    echo "Input directory size: $INPUT_SIZE"
-    echo "Output directory size: $OUTPUT_SIZE"
+    INPUT_SIZE=$(du -sh "$INPUT_DIR" 2>/dev/null | cut -f1)
+    if [ -d "$OUTPUT_DIR" ] && [ "$(ls -A "$OUTPUT_DIR" 2>/dev/null)" ]; then
+        OUTPUT_SIZE=$(du -sh "$OUTPUT_DIR" 2>/dev/null | cut -f1)
+        echo "Input directory size: $INPUT_SIZE"
+        echo "Output directory size: $OUTPUT_SIZE"
+    else
+        echo "Input directory size: $INPUT_SIZE"
+        echo "Output directory is empty or does not exist"
+    fi
 fi
