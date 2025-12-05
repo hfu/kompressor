@@ -156,19 +156,26 @@ compress_geotiff() {
     local level_opt=""
     if [ "$compression_type" = "ZSTD" ]; then
         level_opt="-co ZSTD_LEVEL=$compression_level"
-    elif [ "$compression_type" = "DEFLATE" ] || [ "$compression_type" = "LZMA" ]; then
+    elif [ "$compression_type" = "DEFLATE" ] || [ "$compression_type" = "LZMA" ] || [ "$compression_type" = "LZW" ]; then
         level_opt="-co ZLEVEL=$compression_level"
     elif [ "$compression_type" = "LERC_ZSTD" ]; then
         level_opt="-co ZSTD_LEVEL=$compression_level"
     fi
     
-    if gdal_translate -q \
-        -co COMPRESS="$compression_type" \
-        $level_opt \
-        $predictor_opt \
-        -co TILED=YES \
-        -co BIGTIFF=IF_SAFER \
-        "$input_file" "$output_file" 2>&1; then
+    # Build gdal_translate command with optional arguments
+    local gdal_cmd=(gdal_translate -q -co COMPRESS="$compression_type")
+    
+    if [ -n "$level_opt" ]; then
+        gdal_cmd+=($level_opt)
+    fi
+    
+    if [ -n "$predictor_opt" ]; then
+        gdal_cmd+=($predictor_opt)
+    fi
+    
+    gdal_cmd+=(-co TILED=YES -co BIGTIFF=IF_SAFER "$input_file" "$output_file")
+    
+    if "${gdal_cmd[@]}" 2>&1; then
         echo "[OK] Compressed: $relative_path"
     else
         echo "[ERROR] Failed to compress: $relative_path" >&2
