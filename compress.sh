@@ -148,29 +148,29 @@ compress_geotiff() {
     # -co TILED=YES: Create tiled TIFF for better performance
     # -co BIGTIFF=IF_SAFER: Use BigTIFF if needed
     
-    local predictor_opt=""
+    local predictor_opt=()
     if [ "$compression_type" = "LZW" ] || [ "$compression_type" = "DEFLATE" ]; then
-        predictor_opt="-co PREDICTOR=2"
+        predictor_opt=(-co PREDICTOR=2)
     fi
     
-    local level_opt=""
+    local level_opt=()
     if [ "$compression_type" = "ZSTD" ]; then
-        level_opt="-co ZSTD_LEVEL=$compression_level"
+        level_opt=(-co ZSTD_LEVEL="$compression_level")
     elif [ "$compression_type" = "DEFLATE" ] || [ "$compression_type" = "LZMA" ] || [ "$compression_type" = "LZW" ]; then
-        level_opt="-co ZLEVEL=$compression_level"
+        level_opt=(-co ZLEVEL="$compression_level")
     elif [ "$compression_type" = "LERC_ZSTD" ]; then
-        level_opt="-co ZSTD_LEVEL=$compression_level"
+        level_opt=(-co ZSTD_LEVEL="$compression_level")
     fi
     
     # Build gdal_translate command with optional arguments
     local gdal_cmd=(gdal_translate -q -co COMPRESS="$compression_type")
     
-    if [ -n "$level_opt" ]; then
-        gdal_cmd+=($level_opt)
+    if [ ${#level_opt[@]} -gt 0 ]; then
+        gdal_cmd+=("${level_opt[@]}")
     fi
     
-    if [ -n "$predictor_opt" ]; then
-        gdal_cmd+=($predictor_opt)
+    if [ ${#predictor_opt[@]} -gt 0 ]; then
+        gdal_cmd+=("${predictor_opt[@]}")
     fi
     
     gdal_cmd+=(-co TILED=YES -co BIGTIFF=IF_SAFER "$input_file" "$output_file")
