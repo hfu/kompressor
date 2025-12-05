@@ -105,6 +105,13 @@ if ! command -v gdal_translate &> /dev/null; then
     exit 1
 fi
 
+if ! command -v gdalinfo &> /dev/null; then
+    echo "Error: gdalinfo not found. Please install GDAL tools."
+    echo "  Ubuntu/Debian: sudo apt-get install gdal-bin"
+    echo "  macOS: brew install gdal"
+    exit 1
+fi
+
 if ! command -v parallel &> /dev/null; then
     echo "Error: GNU parallel not found. Please install parallel."
     echo "  Ubuntu/Debian: sudo apt-get install parallel"

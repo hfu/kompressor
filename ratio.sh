@@ -51,6 +51,17 @@ if [ ! -d "$OUTPUT_DIR" ]; then
     exit 1
 fi
 
+# Helper functions
+get_file_size() {
+    local file="$1"
+    stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null
+}
+
+format_size() {
+    local size="$1"
+    numfmt --to=iec-i --suffix=B "$size" 2>/dev/null || echo "$size bytes"
+}
+
 # Initialize counters
 total_input_size=0
 total_output_size=0
@@ -75,12 +86,12 @@ while IFS= read -r input_file; do
     output_file="$OUTPUT_DIR/$relative_path"
     
     # Get input file size
-    input_size=$(stat -f%z "$input_file" 2>/dev/null || stat -c%s "$input_file" 2>/dev/null)
+    input_size=$(get_file_size "$input_file")
     
     # Check if output file exists
     if [ -f "$output_file" ]; then
         # Get output file size
-        output_size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file" 2>/dev/null)
+        output_size=$(get_file_size "$output_file")
         
         # Calculate compression ratio as integer percentage (guard against division by zero)
         if [ "$input_size" -gt 0 ]; then
@@ -115,8 +126,8 @@ echo ""
 
 if [ $compressed_count -gt 0 ]; then
     echo "Compressed files: $compressed_count"
-    echo "  Input total size:  $(numfmt --to=iec-i --suffix=B $total_input_size 2>/dev/null || echo "$total_input_size bytes")"
-    echo "  Output total size: $(numfmt --to=iec-i --suffix=B $total_output_size 2>/dev/null || echo "$total_output_size bytes")"
+    echo "  Input total size:  $(format_size $total_input_size)"
+    echo "  Output total size: $(format_size $total_output_size)"
     echo ""
     
     # Calculate overall compression ratio (guard against division by zero)
@@ -125,7 +136,7 @@ if [ $compressed_count -gt 0 ]; then
         space_saved=$((total_input_size - total_output_size))
         
         echo "Overall compression ratio: $overall_ratio% of original size"
-        echo "Space saved: $(numfmt --to=iec-i --suffix=B $space_saved 2>/dev/null || echo "$space_saved bytes")"
+        echo "Space saved: $(format_size $space_saved)"
         
         # Calculate compression percentage (how much was reduced)
         compression_percentage=$((100 - overall_ratio))
