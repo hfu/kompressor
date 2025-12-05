@@ -98,15 +98,8 @@ if [ ! -d "$INPUT_DIR" ]; then
 fi
 
 # Check for required tools
-if ! command -v gdal_translate &> /dev/null; then
-    echo "Error: gdal_translate not found. Please install GDAL tools."
-    echo "  Ubuntu/Debian: sudo apt-get install gdal-bin"
-    echo "  macOS: brew install gdal"
-    exit 1
-fi
-
-if ! command -v gdalinfo &> /dev/null; then
-    echo "Error: gdalinfo not found. Please install GDAL tools."
+if ! command -v gdal_translate &> /dev/null || ! command -v gdalinfo &> /dev/null; then
+    echo "Error: GDAL tools not found. Please install GDAL."
     echo "  Ubuntu/Debian: sudo apt-get install gdal-bin"
     echo "  macOS: brew install gdal"
     exit 1
