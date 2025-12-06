@@ -186,7 +186,7 @@ Overall compression ratio: 28% of original size
 Space saved: 108MiB
 Compression percentage: 72% reduction
 
-Not yet compressed: 1 files
+Not yet compressed: 1 file
 Progress: 3/4 (75% complete)
 
 ==========================================
