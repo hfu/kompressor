@@ -192,6 +192,27 @@ Progress: 3/4 (75% complete)
 ==========================================
 ```
 
+Example output for a large dataset:
+```
+Summary
+==========================================
+
+Total GeoTIFF files in input directory: 206127
+
+Compressed files: 104382
+  Input total size:  329GiB
+  Output total size: 112GiB
+
+Overall compression ratio: 34% of original size
+Space saved: 217GiB
+Compression percentage: 66% reduction
+
+Not yet compressed: 101745 files
+Progress: 104382/206127 (50% complete)
+
+==========================================
+```
+
 ### Getting Help
 
 ```bash
