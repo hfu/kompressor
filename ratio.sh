@@ -136,7 +136,12 @@ if [ $compressed_count -gt 0 ]; then
         space_saved=$((total_input_size - total_output_size))
         
         echo "Overall compression ratio: $overall_ratio% of original size"
-        echo "Space saved: $(format_size $space_saved)"
+        if [ $space_saved -ge 0 ]; then
+            echo "Space saved: $(format_size $space_saved)"
+        else
+            abs_space_saved=${space_saved#-}
+            echo "Space increased: $(format_size $abs_space_saved)"
+        fi
         
         # Calculate compression percentage (how much was reduced)
         compression_percentage=$((100 - overall_ratio))
