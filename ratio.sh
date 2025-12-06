@@ -140,7 +140,12 @@ if [ $compressed_count -gt 0 ]; then
         
         # Calculate compression percentage (how much was reduced)
         compression_percentage=$((100 - overall_ratio))
-        echo "Compression percentage: $compression_percentage% reduction"
+        if [ $overall_ratio -le 100 ]; then
+            echo "Compression percentage: $compression_percentage% reduction"
+        else
+            increase_percentage=$((overall_ratio - 100))
+            echo "Compression percentage: 0% reduction (files increased by $increase_percentage%)"
+        fi
     else
         echo "Overall compression ratio: N/A (zero input size)"
     fi
