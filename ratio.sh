@@ -59,7 +59,16 @@ get_file_size() {
 
 format_size() {
     local size="$1"
-    numfmt --to=iec-i --suffix=B "$size" 2>/dev/null || echo "$size bytes"
+    if command -v numfmt >/dev/null 2>&1; then
+        numfmt --to=iec-i --suffix=B "$size"
+    else
+        # Use awk for cross-platform human-readable formatting
+        awk -v s="$size" 'function human(x) {
+            split("B KiB MiB GiB TiB PiB", units);
+            for (i=1; x>=1024 && i<6; i++) x/=1024;
+            return sprintf("%.1f %s", x, units[i]);
+        } BEGIN { print human(s) }'
+    fi
 }
 
 # Initialize counters
