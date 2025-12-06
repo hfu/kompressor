@@ -151,7 +151,12 @@ fi
 echo ""
 
 if [ $not_compressed_count -gt 0 ]; then
-    echo "Not yet compressed: $not_compressed_count files"
+    if [ $not_compressed_count -eq 1 ]; then
+        file_word="file"
+    else
+        file_word="files"
+    fi
+    echo "Not yet compressed: $not_compressed_count $file_word"
     
     if [ $total_files -gt 0 ]; then
         progress_percentage=$((compressed_count * 100 / total_files))
