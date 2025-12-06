@@ -11,7 +11,9 @@ This tool is designed to efficiently compress large numbers (200,000+) of GeoTIF
 - 🎛️ **Flexible compression options** (ZSTD, LZW, DEFLATE, LZMA, LERC_ZSTD)
 - 🔍 **Dry-run mode** to preview operations before execution
 - 📊 **Progress tracking** with visual progress bar
-- ⚡ **Smart skip** of already compressed files
+- ⚡ **Smart skip** of already compressed files with validation
+- 🔄 **Resumable compression** - safely restart interrupted compression jobs
+- 📈 **Compression ratio analysis** - calculate and display compression statistics
 - 🏔️ **DEM-optimized** compression settings
 
 ## Installation
@@ -125,6 +127,71 @@ just compress input_dir output_dir --jobs 8
 just compress input_dir output_dir --compression-type ZSTD --compression-level 9 --jobs 16
 ```
 
+### Resumable Compression
+
+The compress task is now resumable. If compression is interrupted, you can safely restart it:
+
+```bash
+just compress input_dir output_dir
+```
+
+The tool will:
+- Skip files that are already compressed and valid
+- Recompress files that exist but are invalid GeoTIFF files
+- Process files that haven't been compressed yet
+
+This is achieved by validating each output file with `gdalinfo` before skipping.
+
+### Compression Ratio Analysis
+
+Calculate and display compression statistics for your dataset:
+
+```bash
+just ratio input_dir output_dir
+```
+
+This will:
+- Display the compression ratio for each file (as percentage of original size)
+- Show overall compression statistics
+- Report how many files are not yet compressed
+- Display progress percentage
+
+Example output:
+```
+==========================================
+Compression Ratio Analysis
+==========================================
+
+Comparing files between:
+  Input:  input/
+  Output: output/
+
+==========================================
+
+dem_file1.tif                                                                      28%
+dem_file2.tif                                                                      32%
+dem_file3.tif                                                                      25%
+
+==========================================
+Summary
+==========================================
+
+Total GeoTIFF files in input directory: 4
+
+Compressed files: 3
+  Input total size:  150MiB
+  Output total size: 42MiB
+
+Overall compression ratio: 28% of original size
+Space saved: 108MiB
+Compression percentage: 72% reduction
+
+Not yet compressed: 1 file
+Progress: 3/4 (75% complete)
+
+==========================================
+```
+
 ### Getting Help
 
 ```bash
@@ -196,7 +263,9 @@ The compression script uses these GDAL creation options:
 ### File Processing
 
 - Maintains directory structure from input to output
-- Skips files that are already compressed and up-to-date
+- Validates output files using `gdalinfo` before skipping
+- Recompresses invalid GeoTIFF files automatically
+- Supports resumable compression for interrupted jobs
 - Processes `.tif` and `.tiff` files (case-insensitive)
 - Preserves all geospatial metadata and coordinate systems
 
@@ -225,6 +294,18 @@ just compress /data/input /data/output --compression-level 3 --jobs 4
 ### Best compression for archival
 ```bash
 just compress /data/input /data/output --compression-type ZSTD --compression-level 9
+```
+
+### Check compression statistics
+```bash
+just ratio /data/input /data/output
+```
+
+### Resume interrupted compression
+```bash
+# If compression was interrupted, simply run it again
+just compress /data/input /data/output
+# Already compressed files will be validated and skipped
 ```
 
 ## Troubleshooting

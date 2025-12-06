@@ -30,6 +30,11 @@ compress-deflate input_dir output_dir *ARGS:
 compress-lerc input_dir output_dir *ARGS:
     ./compress.sh "{{input_dir}}" "{{output_dir}}" --compression-type LERC_ZSTD {{ARGS}}
 
+# Calculate compression ratios and show statistics
+# Usage: just ratio input_dir output_dir
+ratio input_dir output_dir:
+    ./ratio.sh "{{input_dir}}" "{{output_dir}}"
+
 # Check if required tools are installed
 check-deps:
     #!/usr/bin/env bash
@@ -38,5 +43,7 @@ check-deps:
     if command -v just &> /dev/null; then echo "✓ installed"; else echo "✗ not found"; fi
     echo -n "gdal_translate: "
     if command -v gdal_translate &> /dev/null; then echo "✓ installed"; else echo "✗ not found"; fi
+    echo -n "gdalinfo: "
+    if command -v gdalinfo &> /dev/null; then echo "✓ installed"; else echo "✗ not found"; fi
     echo -n "parallel: "
     if command -v parallel &> /dev/null; then echo "✓ installed"; else echo "✗ not found"; fi
