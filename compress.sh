@@ -137,7 +137,7 @@ compress_geotiff() {
     # Skip if output file already exists and is a valid GeoTIFF
     if [ -f "$output_file" ]; then
         # Check if the output file is a valid GeoTIFF
-        if gdalinfo "$output_file" &> /dev/null; then
+        if timeout 30 gdalinfo "$output_file" &> /dev/null; then
             echo "[SKIP] Already compressed: $relative_path"
             return 0
         else
